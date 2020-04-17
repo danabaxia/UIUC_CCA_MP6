@@ -20,7 +20,7 @@ public class WordCountBolt extends BaseBasicBolt {
     Task: word count
 		Hint: using instance variable to tracking the word count
     ------------------------------------------------- */
-
+    print("this is a test of git cmd")
 		// End
   }
 
