@@ -43,36 +43,71 @@ components:
   # Task: implement the redis store mapper
   # src/main/java/edu/illinois/storm/WordCountStoreMapper.java
   # redis hash key for part A is "partAWordCount"
+  - id: "storeMapper"
+    className: "edu.illinois.storm.WordCountStoreMapper"
+    constructorArgs:
+      - "partAWordCount"
 
 # spout definitions
 spouts:
   # TODO
   # Task: implement the random sentence spout
   # src/main/java/edu/illinois/storm/RandomSentenceSpout.java
+  - id: "randomSentenceSpout"
+    className: "edu.illinois.storm.RandomSentenceSpou"
+    parallelism: 1
 
 # bolt definitions
 bolts:
   # TODO
   # Task: implement the split sentences bolt
   # src/main/java/edu/illinois/storm/SplitSentenceBolt.java
+  - id: "splitSentenceBolt"
+    className: "edu.illinois.storm.SplitSentenceBolt"
+    parallelism: 1
 
   # TODO
   # Task: implement the word count bolt
   # src/main/java/edu/illinois/storm/WordCountBolt.java
+  - id: "wordCountBolt"
+    className: "edu.illinois.storm.WordCountBolt"
+    parallelism: 1
 
   # TODO
   # Task: initialize RedisStoreBolt using poolConfig and storeMapper
   # ClassName is "org.apache.storm.redis.bolt.RedisStoreBolt"
+  - id: "redisStoreBolt"
+    className: "org.apache.storm.redis.bolt.RedisStoreBolt"
+    constructorArgs:
+      -ref: "poolConfig"
+      -ref: "storeMapper"
+    parallelism: 1
 
 # stream definitions
 # stream definitions define connections between spouts and bolts.
 streams:
   # TODO
   # Task: pipe output of sentences generating spout to split bolt
+  - name: "random --> split"
+    from: "randomSentenceSpout"
+    to: "splitSentenceBolt"
+    grouping:
+      type: SHUFFLE
 
   # TODO
   # Task: pipe output of split bolt to word count bolt
   # Hint: choose the right grouping type to make problem easier
+  - name: "split --> count"
+    from: "splitSentenceBolt"
+    to: "wordCountBolt"
+    grouping:
+      types: FIELDS
+      args: ["word"]
 
   # TODO
   # Task: pipe output of word count bolt to redis store bolt
+  - name: "count --> redis"
+    from: "wordCountBolt"
+    to: "redisStoreBolt"
+    grouping:
+      type: SHUFFLE 
